@@ -11,14 +11,14 @@
         </div>
         <div>
             <div class="col">
-                <form action="/templates/reserva/detalhe-reserva.html">
+                <form action="{{ url_for('cadastrar_sala') }}" method="post">
                     <div class="mb-3">
                         <label for="tipo" class="form-label">Tipo</label>
                         <select class="form-select" id="tipo" name="tipo">
                             <option selected>Selecione um tipo</option>
-                            <option value="1">Laboratório de Informática</option>
-                            <option value="2">Laboratório de Química</option>
-                            <option value="3">Sala de Aula</option>
+                            <option value="Laboratório de Informática">Laboratório de Informática</option>
+                            <option value="Laboratório de Química">Laboratório de Química</option>
+                            <option value="Sala de Aula">Sala de Aula</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -38,4 +38,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-{% endblock %} 
+{% endblock %}

@@ -10,17 +10,40 @@
     </div>
     <div class="row mt-4">
       <div class="col">
-        <input type="text" class="form-control" placeholder="First name" aria-label="First name">
+        <input type="text" class="form-control" placeholder="Filtrar por sala" aria-label="Filtrar por sala">
       </div>
       <div class="col">
-        <input type="text" class="form-control" placeholder="Last name" aria-label="Last name">
+        <input type="text" class="form-control" placeholder="Filtrar por data" aria-label="Filtrar por data">
       </div>
       <div class="col">
-        <button class="btn btn-dark" type="submit">Filtrar</button>
+        <button class="btn btn-dark" type="button">Filtrar</button>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Sala</th>
+              <th>Data e Hora Início</th>
+              <th>Data e Hora Fim</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for reserva in reservas %}
+              <tr>
+                <td>{{ reserva.sala }}</td>
+                <td>{{ reserva.inicio }}</td>
+                <td>{{ reserva.fim }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
-{% endblock %} 
+{% endblock %}
