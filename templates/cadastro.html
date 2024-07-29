@@ -15,13 +15,25 @@
           <input type="email" class="form-control" name="email" id="email">
         </div>
         <div class="mb-3">
-          <label for="password" class="form-label">Senha</label>
-          <input type="password" class="form-control" name="password" id="password">
+          <label for="senha" class="form-label">Senha</label>
+          <input type="password" class="form-control" name="senha" id="senha">
         </div>
         <div class="mb-3">
           <button type="submit" class="btn btn-dark">Cadastrar</button>
         </div>
       </form>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="alert alert-danger mt-3 d-flex justify-content-between align-items-center" role="alert">
+            <div>
+              {% for message in messages %}
+                {{ message }}
+              {% endfor %}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endif %}
+      {% endwith %}
     </div>
   </div>
 

@@ -15,22 +15,38 @@
           <div class="mb-3">
             <label for="sala" class="form-label">Sala</label>
             <select class="form-select" id="sala" name="sala">
-              <option selected>Selecione a sala</option>
-              <option value="Sala 1">Sala 1</option>
-              <option value="Sala 2">Sala 2</option>
-              <option value="Sala 3">Sala 3</option>
+              <option value="" {% if not sala %}selected{% endif %}></option>
+              {% for s in salas %}
+                {% if s.ativa == 'Ativa' %}
+                  <option value="{{ s.id }}" {% if s.id == sala %}selected{% endif %}>
+                    {{ s.id }} - {{ s.tipo }}
+                  </option>
+                {% endif %}
+              {% endfor %}
             </select>
           </div>
           <div class="mb-3">
             <label for="inicio" class="form-label">Data e Hora Início</label>
-            <input type="datetime-local" class="form-control" name="inicio" id="inicio">
+            <input type="datetime-local" class="form-control" name="inicio" id="inicio" value="{{ inicio }}">
           </div>
           <div class="mb-3">
             <label for="fim" class="form-label">Data e Hora Fim</label>
-            <input type="datetime-local" class="form-control" name="fim" id="fim">
+            <input type="datetime-local" class="form-control" name="fim" id="fim" value="{{ fim }}">
           </div>
           <button type="submit" class="btn btn-dark">Reservar</button>
         </form>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+          <div class="alert alert-danger mt-3 d-flex justify-content-between align-items-center" role="alert">
+            <div>
+            {% for message in messages %}
+              {{ message }}
+            {% endfor %}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endif %}
+        {% endwith %}
       </div>
     </div>
   </div>
