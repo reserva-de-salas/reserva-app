@@ -35,6 +35,11 @@
                 <td>{{ reserva.sala }}</td>
                 <td>{{ reserva.inicio }}</td>
                 <td>{{ reserva.fim }}</td>
+                <td>
+                  <form id="excluir-form-{{ reserva.id }}" action="/excluir-reserva/{{ reserva.id }}" method="post" style="display:inline;">
+                    <button class="btn btn-sm btn-dark" type="submit" onclick="confirmarExclusao(event, 'excluir-form-{{ reserva.id }}')">Excluir</button>
+                  </form>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
@@ -42,6 +47,16 @@
       </div>
     </div>
   </div>
+
+  <script>
+    function confirmarExclusao(event, formId) {
+      event.preventDefault();
+      var confirma = confirm("Tem certeza de que deseja excluir esta reserva?");
+      if (confirma) {
+        document.getElementById(formId).submit();
+      }
+    }
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

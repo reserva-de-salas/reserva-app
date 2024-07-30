@@ -22,7 +22,7 @@ def criar_arquivo_csv(file_path, headers):
 
 criar_arquivo_csv(salas_csv, ["id", "tipo", "descricao", "capacidade", "ativa"])
 criar_arquivo_csv(usuarios_csv, ["nome", "email", "salt", "hash_senha"])
-criar_arquivo_csv(reservas_csv, ["sala", "inicio", "fim"])
+criar_arquivo_csv(reservas_csv, ["id", "sala", "inicio", "fim"])
 
 def listar_salas():
     salas = []
@@ -32,9 +32,9 @@ def listar_salas():
             salas.append(linha)
     return salas
 
-def procurar_proximo_id():
+def procurar_proximo_id(arquivo_csv):
     ids = []
-    with open(salas_csv, 'r', encoding='utf-8') as file:
+    with open(arquivo_csv, 'r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for linha in reader:
             if linha['id'].isdigit():
@@ -42,7 +42,7 @@ def procurar_proximo_id():
     return max(ids) + 1 if ids else 1
 
 def add_sala(sala):
-    sala['id'] = procurar_proximo_id()
+    sala['id'] = procurar_proximo_id(salas_csv)
     with open(salas_csv, "a", encoding='utf-8', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=["id", "tipo", "descricao", "capacidade", "ativa"])
         writer.writerow(sala)
@@ -113,9 +113,10 @@ def verificar_existencia_de_usuario(email):
     return True
 
 def add_reserva(reserva):
+    reserva['id'] = procurar_proximo_id(reservas_csv)
     with open(reservas_csv, "a", encoding='utf-8', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([reserva['sala'], reserva['inicio'], reserva['fim']])
+        writer.writerow([reserva['id'], reserva['sala'], reserva['inicio'], reserva['fim']])
 
 def listar_reservas():
     reservas = []
@@ -167,9 +168,11 @@ def validar_antecedencia_reserva(inicio_str):
 
 @app.route("/")
 def home():
-    if 'email' in session:
-        return redirect("/reservas")
-    return redirect("/login")
+    
+    #if 'email' in session:
+    #    return redirect("/reservas")
+    #return redirect("/login")
+    return redirect("/reservas")
 
 @app.route("/cadastrar-sala", methods=["GET"])
 def mostrar_formulario():
@@ -379,6 +382,20 @@ def excluir_sala(id):
             writer.writerow(sala)
     
     return redirect("/listar-salas")
+
+@app.route("/excluir-reserva/<int:id>", methods=["POST"])
+def excluir_reserva(id):
+    reservas = listar_reservas()
+
+    reservas = [reserva for reserva in reservas if int(reserva['id']) != id]
+
+    with open(reservas_csv, "w", newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=["id", "sala", "inicio", "fim"])
+        writer.writeheader()
+        for reserva in reservas:
+            writer.writerow(reserva)
+    
+    return redirect("/reservas")
 
 if __name__ == "__main__":
     app.run(debug=True)
