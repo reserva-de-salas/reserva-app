@@ -3,7 +3,7 @@ import hashlib
 import os
 import re
 import secrets
-from flask import Flask, flash, render_template, redirect, request
+from flask import Flask, flash, render_template, redirect, request, session
 from datetime import datetime, timedelta
 
 
@@ -167,7 +167,9 @@ def validar_antecedencia_reserva(inicio_str):
 
 @app.route("/")
 def home():
-    return redirect("/reservas")
+    if 'email' in session:
+        return redirect("/reservas")
+    return redirect("/login")
 
 @app.route("/cadastrar-sala", methods=["GET"])
 def mostrar_formulario():
