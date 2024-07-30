@@ -168,11 +168,9 @@ def validar_antecedencia_reserva(inicio_str):
 
 @app.route("/")
 def home():
-    
-    #if 'email' in session:
-    #    return redirect("/reservas")
-    #return redirect("/login")
-    return redirect("/reservas")
+    if 'email' in session:
+        return redirect("/reservas")
+    return redirect("/login")
 
 @app.route("/cadastrar-sala", methods=["GET"])
 def mostrar_formulario():
