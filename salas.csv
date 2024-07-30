@@ -1,9 +1,8 @@
 id,tipo,descricao,capacidade,ativa
 1,Laboratório de Química,,101,Ativa
 2,Laboratório de Informática,,11,Ativa
-3,Laboratório de Informática,,20,Ativa
-4,Laboratório de Química,,150,Ativa
-5,Laboratório de Química,,10,Inativa
-6,Sala de Aula,Descrição muito longa,11,Inativa
 7,Laboratório de Química,,22,Ativa
 8,Sala de Aula,Descrição nao muito longa,122,Ativa
+9,Laboratório de Informática,descricao dentro do limite,14,Ativa
+10,Laboratório de Química,oioioiadca,150,Ativa
+11,Sala de Aula,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadcqr,111,Ativa

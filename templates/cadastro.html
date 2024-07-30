@@ -8,15 +8,15 @@
       <form class="card-text" action="{{ url_for('cadastro') }}" method="post">
         <div class="mb-3">
           <label for="nome" class="form-label">Nome</label>
-          <input type="text" class="form-control" name="nome" id="nome">
+          <input type="text" class="form-control" name="nome" id="nome" value="{{ nome }}">
         </div>
         <div class="mb-3">
           <label for="email" class="form-label">E-mail</label>
-          <input type="email" class="form-control" name="email" id="email">
+          <input type="email" class="form-control" name="email" id="email" value="{{ email }}">
         </div>
         <div class="mb-3">
           <label for="senha" class="form-label">Senha</label>
-          <input type="password" class="form-control" name="senha" id="senha">
+          <input type="password" class="form-control" name="senha" id="senha" value="{{ senha }}">
         </div>
         <div class="mb-3">
           <button type="submit" class="btn btn-dark">Cadastrar</button>

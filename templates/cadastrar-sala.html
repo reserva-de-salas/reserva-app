@@ -16,18 +16,18 @@
                         <label for="tipo" class="form-label">Tipo</label>
                         <select class="form-select" id="tipo" name="tipo">
                             <option value="" {% if not sala %}selected{% endif %}></option>
-                            <option value="Laboratório de Informática" {% if sala and sala.tipo == 'Laboratório de Informática' %}selected{% endif %}>Laboratório de Informática</option>
-                            <option value="Laboratório de Química" {% if sala and sala.tipo == 'Laboratório de Química' %}selected{% endif %}>Laboratório de Química</option>
-                            <option value="Sala de Aula" {% if sala and sala.tipo == 'Sala de Aula' %}selected{% endif %}>Sala de Aula</option>
+                            <option value="Laboratório de Informática" {% if sala and sala.tipo == 'Laboratório de Informática' or tipo == 'Laboratório de Informática' %}selected{% endif %}>Laboratório de Informática</option>
+                            <option value="Laboratório de Química" {% if sala and sala.tipo == 'Laboratório de Química' or tipo == 'Laboratório de Química' %}selected{% endif %}>Laboratório de Química</option>
+                            <option value="Sala de Aula" {% if sala and sala.tipo == 'Sala de Aula' or tipo == 'Sala de Aula' %}selected{% endif %}>Sala de Aula</option>
                         </select>
-                    </div>
+                    </div>      
                     <div class="mb-3">
                         <label for="capacidade" class="form-label">Capacidade</label>
-                        <input type="number" class="form-control" name="capacidade" id="capacidade" value="{{ sala.capacidade if sala else '' }}">
+                        <input type="number" class="form-control" name="capacidade" id="capacidade" value="{{ sala.capacidade if sala else capacidade }}">
                     </div>
                     <div class="mb-3">
                         <label for="descricao" class="form-label">Descrição</label>
-                        <textarea class="form-control" name="descricao" id="descricao" cols="30" rows="10">{{ sala.descricao if sala else '' }}</textarea>
+                        <textarea class="form-control" name="descricao" id="descricao" cols="30" rows="10">{{ sala.descricao if sala else descricao }}</textarea>
                     </div>
                     <button type="submit" class="btn btn-dark">{{ 'Atualizar' if sala else 'Cadastrar' }}</button>
                 </form>

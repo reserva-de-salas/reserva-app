@@ -153,18 +153,18 @@ def cadastrar_sala():
 
     if not tipo or not capacidade:
         flash("Preencha os campos de tipo e capacidade.")
-        return redirect('cadastrar-sala')
+        return render_template('cadastrar-sala.html', tipo=tipo, capacidade=capacidade, descricao=descricao)
     
     capacidade = int(capacidade)
 
     if capacidade < 10 or capacidade > 150:
         flash("As salas de aula devem ter capacidade para comportar entre 10 e 150 alunos.")
-        return redirect('cadastrar-sala')   
+        return render_template('cadastrar-sala.html', tipo=tipo, capacidade=capacidade, descricao=descricao)
 
 
     if len(descricao) > 150:
         flash("A descrição de uma sala pode ter até 150 caracteres.")  
-        return redirect('cadastrar-sala')   
+        return render_template('cadastrar-sala.html', tipo=tipo, capacidade=capacidade, descricao=descricao)
 
     sala = {"tipo": tipo, "capacidade": capacidade, "descricao": descricao, "ativa": "Ativa"}
 
@@ -186,12 +186,12 @@ def cadastro():
 
         if not nome or not email or not senha:
             flash("Preencha todos os campos.")
-            return redirect('cadastro')
+            return render_template('cadastro.html', nome=nome, email=email, senha=senha)
         
         usuario = {"nome": nome, "email": email, "senha": senha}
 
         if not verificar_existencia_de_usuario(email) or not add_usuario(usuario):
-            return redirect("/cadastro")
+            return render_template('cadastro.html', nome=nome, email=email, senha=senha)
 
         return redirect("/reservas")
 
@@ -205,22 +205,23 @@ def login():
 
         if  not email or not senha:
             flash("Preencha todos os campos.")
-            return redirect('login')
+            return render_template('login.html', email=email, senha=senha)
         
         if verificar_usuario(email, senha, False):
             if verificar_login(email, senha):
                 return redirect("/reservas")  
             
         flash("E-mail e/ou senha inválidos")
+        return render_template('login.html', email=email, senha=senha)
             
     return render_template("login.html")
 
 @app.route("/reservar-sala", methods=["GET", "POST"])
 def reservar_sala():
     if request.method == "POST":
-        sala = request.form("sala")
-        inicio = request.form("inicio")
-        fim = request.form("fim")
+        sala = request.form.get("sala")
+        inicio = request.form.get("inicio")
+        fim = request.form.get("fim")
 
         if not sala or not inicio or not fim:
             flash("Preencha todos os campos.")
@@ -258,10 +259,6 @@ def editar_sala(id):
     salas = listar_salas()
     sala = next((s for s in salas if int(s['id']) == id), None)
 
-    if not sala:
-        flash("Sala não encontrada")
-        return redirect("/listar-salas")
-
     if request.method == "POST":
         tipo = request.form["tipo"]
         capacidade = request.form["capacidade"]
@@ -269,21 +266,35 @@ def editar_sala(id):
 
         if not tipo or not capacidade:
             flash("Preencha os campos de tipo e capacidade.")
-            return redirect(f'/editar-sala/{id}')
+            return render_template("cadastrar-sala.html", sala={
+                "id": id,
+                "tipo": tipo,
+                "capacidade": capacidade,
+                "descricao": descricao,
+                "ativa": sala["ativa"]
+            })
         
-        try:
-            capacidade = int(capacidade)
-        except ValueError:
-            flash("Capacidade deve ser um número válido.")
-            return redirect(f'/editar-sala/{id}')
+        capacidade = int(capacidade)
 
         if capacidade < 10 or capacidade > 150:
             flash("As salas de aula devem ter capacidade para comportar entre 10 e 150 alunos.")
-            return redirect(f'/editar-sala/{id}')   
+            return render_template("cadastrar-sala.html", sala={
+                "id": id,
+                "tipo": tipo,
+                "capacidade": capacidade,
+                "descricao": descricao,
+                "ativa": sala["ativa"]
+            })
 
         if len(descricao) > 150:
-            flash("A descrição de uma sala pode ter até 150 caracteres.")  
-            return redirect(f'/editar-sala/{id}')   
+            flash("A descrição de uma sala pode ter até 150 caracteres.")
+            return render_template("cadastrar-sala.html", sala={
+                "id": id,
+                "tipo": tipo,
+                "capacidade": capacidade,
+                "descricao": descricao,
+                "ativa": sala["ativa"]
+            })
 
         sala_atualizada = {
             "id": id,
@@ -307,9 +318,6 @@ def editar_sala(id):
 @app.route("/alterar-status-sala/<int:id>", methods=["POST"])
 def alterar_status_sala(id):
     salas = listar_salas()
-    if id < 1 or id > len(salas):
-        flash("Sala não encontrada")
-        return redirect("/listar-salas")
 
     sala = salas[id - 1]
     
@@ -329,9 +337,6 @@ def alterar_status_sala(id):
 @app.route("/excluir-sala/<int:id>", methods=["POST"])
 def excluir_sala(id):
     salas = listar_salas()
-    if id < 1 or id > len(salas):
-        flash("Sala não encontrada")
-        return redirect("/listar-salas")
 
     salas = [sala for sala in salas if int(sala['id']) != id]
 
