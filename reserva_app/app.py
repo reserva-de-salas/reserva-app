@@ -1,6 +1,8 @@
 import csv
+import hashlib
 import os
 import re
+import secrets
 from flask import Flask, flash, render_template, redirect, request
 from datetime import datetime, timedelta
 
@@ -19,7 +21,7 @@ def criar_arquivo_csv(file_path, headers):
             writer.writerow(headers)
 
 criar_arquivo_csv(salas_csv, ["id", "tipo", "descricao", "capacidade", "ativa"])
-criar_arquivo_csv(usuarios_csv, ["nome", "email", "senha"])
+criar_arquivo_csv(usuarios_csv, ["nome", "email", "salt", "hash_senha"])
 criar_arquivo_csv(reservas_csv, ["sala", "inicio", "fim"])
 
 def listar_salas():
@@ -66,20 +68,39 @@ def verificar_usuario(email, senha, c):
         return False
     return True
 
+def hash_senha_com_salt(senha):
+    salt = secrets.token_hex(16)
+    hash_senha = hashlib.pbkdf2_hmac('sha256', senha.encode('utf-8'), salt.encode('utf-8'), 100000).hex()
+    return salt, hash_senha
+
 def add_usuario(usuario):
     if verificar_usuario(usuario['email'], usuario['senha'], True):
+        salt, hash_senha = hash_senha_com_salt(usuario['senha'])
+
         with open(usuarios_csv, "a", encoding='utf-8', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([usuario['nome'], usuario['email'], usuario['senha']])
+            writer.writerow([usuario['nome'], usuario['email'], salt, hash_senha])
+
         return True
+    
     return False
+
+def hash_senha(senha, salt):
+    return hashlib.pbkdf2_hmac('sha256', senha.encode('utf-8'), salt.encode('utf-8'), 100000).hex()
 
 def verificar_login(email, senha):
     with open(usuarios_csv, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
+        
         for linha in reader:
-            if len(linha) == 3 and linha[1] == email and linha[2] == senha:
-                return True
+            if len(linha) == 4 and linha[1] == email:
+                salt_armazenado = linha[2]
+                hashed_senha_armazenada = linha[3]
+
+                hashed_senha = hash_senha(senha, salt_armazenado)
+
+                if hashed_senha == hashed_senha_armazenada:
+                    return True
     return False
 
 def verificar_existencia_de_usuario(email):
@@ -98,10 +119,17 @@ def add_reserva(reserva):
 
 def listar_reservas():
     reservas = []
+    agora = datetime.now()
+
     with open(reservas_csv, "r", encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for linha in reader:
-            reservas.append(linha)
+            fim_str = linha.get("fim")
+            fim = datetime.fromisoformat(fim_str)
+            
+            if fim > agora:
+                reservas.append(linha)
+            
     return reservas
 
 def validar_duracao_reserva(inicio_str, fim_str):
