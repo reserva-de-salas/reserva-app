@@ -349,7 +349,9 @@ def editar_sala(id):
 def alterar_status_sala(id):
     salas = listar_salas()
 
-    sala = salas[id - 1]
+    for s in salas:
+        if int(s['id']) == id:
+            sala = s
     
     if sala['ativa'] == "Ativa":
         sala['ativa'] = "Inativa"
