@@ -10,13 +10,19 @@
     </div>
     <div class="row mt-4">
       <div class="col">
-        <input type="text" class="form-control" placeholder="Filtrar por sala" aria-label="Filtrar por sala">
-      </div>
-      <div class="col">
-        <input type="text" class="form-control" placeholder="Filtrar por data" aria-label="Filtrar por data">
-      </div>
-      <div class="col">
-        <button class="btn btn-dark" type="button">Filtrar</button>
+        <form action="/filtrar-reservas" method="post" id="filtro-form">
+          <div class="row">
+            <div class="col">
+              <input type="number" name="sala" class="form-control" placeholder="Filtrar por sala" aria-label="Filtrar por sala" value="{{ sala }}">
+            </div>
+            <div class="col">
+              <input type="date" name="data" class="form-control" placeholder="Filtrar por data" aria-label="Filtrar por data" value="{{ data }}">
+            </div>
+            <div class="col">
+              <button class="btn btn-dark" type="submit">Filtrar</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
     <div class="row mt-4">
@@ -27,6 +33,7 @@
               <th>Sala</th>
               <th>Data e Hora Início</th>
               <th>Data e Hora Fim</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -44,6 +51,17 @@
             {% endfor %}
           </tbody>
         </table>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alert alert-danger mt-3 d-flex justify-content-between align-items-center" role="alert">
+              <div>
+                {% for message in messages %}
+                  {{ message }}
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        {% endwith %}
       </div>
     </div>
   </div>

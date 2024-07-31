@@ -107,7 +107,7 @@ def verificar_existencia_de_usuario(email):
     with open(usuarios_csv, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         for linha in reader:
-            if len(linha) == 3 and linha[1] == email:
+            if len(linha) == 4 and linha[1] == email:
                 flash("Já existe uma conta com esse E-mail.")
                 return False
     return True
@@ -394,6 +394,24 @@ def excluir_reserva(id):
             writer.writerow(reserva)
     
     return redirect("/reservas")
+
+@app.route("/filtrar-reservas", methods=["POST"])
+def filtrar_reservas():
+    sala = request.form.get('sala')
+    data = request.form.get('data')
+    
+    reservas = listar_reservas()
+    
+    if sala:
+        reservas = [reserva for reserva in reservas if sala == reserva['sala']]
+    if data:
+        reservas = [reserva for reserva in reservas if data in reserva['inicio'] or data in reserva['fim']]
+
+    if len(reservas) == 0:
+        flash("Nenhuma reserva encontrada.")
+        return render_template("reservas.html", reservas=reservas, sala=sala, data=data)
+    
+    return render_template("reservas.html", reservas=reservas, sala=sala, data=data)
 
 if __name__ == "__main__":
     app.run(debug=True)
