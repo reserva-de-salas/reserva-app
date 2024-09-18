@@ -1,3 +1,4 @@
+import bisect
 import csv
 import hashlib
 import os
@@ -106,11 +107,24 @@ def verificar_login(email, senha):
 def verificar_existencia_de_usuario(email):
     with open(usuarios_csv, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
-        for linha in reader:
-            if len(linha) == 4 and linha[1] == email:
-                flash("Já existe uma conta com esse E-mail.")
-                return False
+        emails = [linha[1] for linha in reader if len(linha) == 4]
+
+        emails.sort()
+
+        indice = bisect.bisect_left(emails, email)
+
+        if indice != len(emails) and emails[indice] == email:
+            flash("Já existe uma conta com esse E-mail.")
+            return False
+    
     return True
+    # with open(usuarios_csv, mode='r', encoding='utf-8') as file:
+    #     reader = csv.reader(file)
+    #     for linha in reader:
+    #         if len(linha) == 4 and linha[1] == email:
+    #             flash("Já existe uma conta com esse E-mail.")
+    #             return False
+    # return True
 
 def add_reserva(reserva):
     reserva['id'] = procurar_proximo_id(reservas_csv)
