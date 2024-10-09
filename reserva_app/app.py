@@ -6,7 +6,8 @@ import re
 import secrets
 from flask import Flask, flash, render_template, redirect, request, session
 from datetime import datetime, timedelta
-
+from main import *
+from conexao_bd import conexao_abrir, conexao_fechar
 
 app = Flask(__name__, template_folder="../templates")
 app.secret_key = 'sua_chave_secreta'  # Necessário para usar a funcionalidade de mensagens
@@ -78,9 +79,11 @@ def add_usuario(usuario):
     if verificar_usuario(usuario['email'], usuario['senha'], True):
         salt, hash_senha = hash_senha_com_salt(usuario['senha'])
 
-        with open(usuarios_csv, "a", encoding='utf-8', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([usuario['nome'], usuario['email'], salt, hash_senha])
+        con = conexao_abrir("localhost", "estudante1", "estudante1", "reservaSalas")
+
+        inserirUsuario(con, usuario['nome'], usuario['email'], salt, hash_senha)
+
+        conexao_fechar(con)
 
         return True
     
@@ -128,9 +131,14 @@ def verificar_existencia_de_usuario(email):
 
 def add_reserva(reserva):
     reserva['id'] = procurar_proximo_id(reservas_csv)
-    with open(reservas_csv, "a", encoding='utf-8', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([reserva['id'], reserva['sala'], reserva['inicio'], reserva['fim']])
+
+    con = conexao_abrir("localhost", "estudante1", "estudante1", "reservaSalas")
+    print(reserva['sala'], reserva['inicio'], reserva['fim'])
+
+    inserirReserva(con, reserva['sala'], reserva['inicio'], reserva['fim']) # argumento sala se chama id_sala dentro do banco
+
+    conexao_fechar(con)
+
 
 def listar_reservas():
     reservas = []
@@ -206,14 +214,15 @@ def cadastrar_sala():
         flash("As salas de aula devem ter capacidade para comportar entre 10 e 150 alunos.")
         return render_template('cadastrar-sala.html', tipo=tipo, capacidade=capacidade, descricao=descricao)
 
-
     if len(descricao) > 150:
         flash("A descrição de uma sala pode ter até 150 caracteres.")  
         return render_template('cadastrar-sala.html', tipo=tipo, capacidade=capacidade, descricao=descricao)
 
-    sala = {"tipo": tipo, "capacidade": capacidade, "descricao": descricao, "ativa": "Ativa"}
+    con = conexao_abrir("localhost", "estudante1", "estudante1", "reservaSalas")
 
-    add_sala(sala)  
+    inserirSala(con, tipo, descricao, capacidade, 1)
+
+    conexao_fechar(con)
     
     return redirect("/listar-salas")
 
