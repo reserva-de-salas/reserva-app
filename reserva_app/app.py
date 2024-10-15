@@ -6,25 +6,18 @@ import re
 import secrets
 from flask import Flask, flash, render_template, redirect, request, session
 from datetime import datetime, timedelta
-from main import *
+from funcoes_bd import *
 from conexao_bd import conexao_abrir, conexao_fechar
 
 app = Flask(__name__, template_folder="../templates")
 app.secret_key = 'sua_chave_secreta'  # Necessário para usar a funcionalidade de mensagens
 
-salas_csv = "salas.csv"
-usuarios_csv = "usuarios.csv"
-reservas_csv = "reservas.csv"
+# con_params = ("localhost", "estudante1", "estudante1", "reservaSalas")   
+con_params = ("localhost", "root", "1234", "reservasalas")   
 
-def criar_arquivo_csv(file_path, headers):
-    if not os.path.exists(file_path):
-        with open(file_path, "w", newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(headers)
-
-criar_arquivo_csv(salas_csv, ["id", "tipo", "descricao", "capacidade", "ativa"])
-criar_arquivo_csv(usuarios_csv, ["nome", "email", "salt", "hash_senha"])
-criar_arquivo_csv(reservas_csv, ["id", "sala", "inicio", "fim"])
+con = conexao_abrir(*con_params)
+criarBanco(con)
+conexao_fechar(con)
 
 def listar_salas():
     salas = []
@@ -79,7 +72,7 @@ def add_usuario(usuario):
     if verificar_usuario(usuario['email'], usuario['senha'], True):
         salt, hash_senha = hash_senha_com_salt(usuario['senha'])
 
-        con = conexao_abrir("localhost", "estudante1", "estudante1", "reservaSalas")
+        con = conexao_abrir(*con_params)
 
         inserirUsuario(con, usuario['nome'], usuario['email'], salt, hash_senha)
 
@@ -93,50 +86,41 @@ def hash_senha(senha, salt):
     return hashlib.pbkdf2_hmac('sha256', senha.encode('utf-8'), salt.encode('utf-8'), 100000).hex()
 
 def verificar_login(email, senha):
-    with open(usuarios_csv, mode='r', encoding='utf-8') as file:
-        reader = csv.reader(file)
-        
-        for linha in reader:
-            if len(linha) == 4 and linha[1] == email:
-                salt_armazenado = linha[2]
-                hashed_senha_armazenada = linha[3]
+    con = conexao_abrir(*con_params)
+    usuarios = listarUsuarios(con)
+    conexao_fechar(con)
+    
+    for usuario in usuarios:
+        if len(usuario) == 4 and usuario[1] == email:
+            salt_armazenado = usuario[2]
+            hashed_senha_armazenada = usuario[3]
 
-                hashed_senha = hash_senha(senha, salt_armazenado)
+            hashed_senha = hash_senha(senha, salt_armazenado)
 
-                if hashed_senha == hashed_senha_armazenada:
-                    return True
+            if hashed_senha == hashed_senha_armazenada:
+                return True
     return False
 
 def verificar_existencia_de_usuario(email):
-    with open(usuarios_csv, mode='r', encoding='utf-8') as file:
-        reader = csv.reader(file)
-        emails = [linha[1] for linha in reader if len(linha) == 4]
+    con = conexao_abrir(*con_params)
+    usuarios = listarUsuarios(con)
+    conexao_fechar(con)
 
-        emails.sort()
+    emails = [linha[1] for linha in usuarios if len(linha) == 4]
 
-        indice = bisect.bisect_left(emails, email)
+    emails.sort()
 
-        if indice != len(emails) and emails[indice] == email:
-            flash("Já existe uma conta com esse E-mail.")
-            return False
+    indice = bisect.bisect_left(emails, email)
+
+    if indice != len(emails) and emails[indice] == email:
+        flash("Já existe uma conta com esse E-mail.")
+        return False
     
     return True
-    # with open(usuarios_csv, mode='r', encoding='utf-8') as file:
-    #     reader = csv.reader(file)
-    #     for linha in reader:
-    #         if len(linha) == 4 and linha[1] == email:
-    #             flash("Já existe uma conta com esse E-mail.")
-    #             return False
-    # return True
 
 def add_reserva(reserva):
-    reserva['id'] = procurar_proximo_id(reservas_csv)
-
-    con = conexao_abrir("localhost", "estudante1", "estudante1", "reservaSalas")
-    print(reserva['sala'], reserva['inicio'], reserva['fim'])
-
+    con = conexao_abrir(*con_params)
     inserirReserva(con, reserva['sala'], reserva['inicio'], reserva['fim']) # argumento sala se chama id_sala dentro do banco
-
     conexao_fechar(con)
 
 
@@ -218,7 +202,7 @@ def cadastrar_sala():
         flash("A descrição de uma sala pode ter até 150 caracteres.")  
         return render_template('cadastrar-sala.html', tipo=tipo, capacidade=capacidade, descricao=descricao)
 
-    con = conexao_abrir("localhost", "estudante1", "estudante1", "reservaSalas")
+    con = conexao_abrir(*con_params)
 
     inserirSala(con, tipo, descricao, capacidade, 1)
 

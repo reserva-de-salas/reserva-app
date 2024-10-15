@@ -1,8 +1,4 @@
-create database reservaSalas;
-
-use reservaSalas;
-
-create table usuario (
+create table if not exists usuario (
 	id int primary key auto_increment,
     nome varchar (100) not null,
     email varchar (255) not null,
@@ -10,7 +6,7 @@ create table usuario (
     hash_senha varchar (64) not null
 );
 
-create table salas (
+create table if not exists salas (
 	id int primary key auto_increment,
     tipo varchar (50) not null,
     descricao varchar (150),
@@ -18,7 +14,7 @@ create table salas (
     ativa boolean not null
 );
 
-create table reservas (
+create table if not exists reservas (
 	id int primary key auto_increment,
     id_sala int,
     inicio datetime,
