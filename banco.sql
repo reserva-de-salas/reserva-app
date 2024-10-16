@@ -1,3 +1,6 @@
+-- create database if not exists reservasalas;
+-- use reservaSalas;
+
 create table if not exists usuario (
 	id int primary key auto_increment,
     nome varchar (100) not null,
@@ -9,8 +12,8 @@ create table if not exists usuario (
 create table if not exists salas (
 	id int primary key auto_increment,
     tipo varchar (50) not null,
-    descricao varchar (150),
     capacidade smallint not null,
+    descricao varchar (150),
     ativa boolean not null
 );
 
@@ -19,5 +22,5 @@ create table if not exists reservas (
     id_sala int,
     inicio datetime,
     fim datetime,
-	foreign key(id_sala) references salas(id)
+	foreign key(id_sala) references salas(id) on delete cascade
 );

@@ -26,22 +26,9 @@ def listar_salas():
 
     return salas
 
-# def procurar_proximo_id(arquivo_csv):
-#     ids = []
-#     with open(arquivo_csv, 'r', encoding='utf-8') as file:
-#         reader = csv.DictReader(file)
-#         for linha in reader:
-#             if linha['id'].isdigit():
-#                 ids.append(int(linha['id']))
-#     return max(ids) + 1 if ids else 1
-
 def add_sala(sala):
-    # sala['id'] = procurar_proximo_id(salas_csv)
-    # with open(salas_csv, "a", encoding='utf-8', newline='') as file:
-    #     writer = csv.DictWriter(file, fieldnames=["id", "tipo", "descricao", "capacidade", "ativa"])
-    #     writer.writerow(sala)
     con = conexao_abrir(*con_params)
-    inserirSala(con, *sala, 1)
+    inserirSala(con, *sala.values(), 1)
     conexao_fechar(con)
 
 def validar_email(email, c):
@@ -120,7 +107,7 @@ def verificar_existencia_de_usuario(email):
 
 def add_reserva(reserva):
     con = conexao_abrir(*con_params)
-    inserirReserva(con, reserva['sala'], reserva['inicio'], reserva['fim']) # argumento sala se chama id_sala dentro do banco
+    inserirReserva(con, *reserva.values()) # argumento sala se chama id_sala dentro do banco
     conexao_fechar(con)
 
 
@@ -189,7 +176,7 @@ def mostrar_formulario():
 def cadastrar_sala():
     tipo = request.form["tipo"]
     capacidade = request.form["capacidade"]
-    descricao = request.form["descricao"]
+    descricao = request.form["descricao"] or "-"
 
     if not tipo or not capacidade:
         flash("Preencha os campos de tipo e capacidade.")
@@ -205,7 +192,13 @@ def cadastrar_sala():
         flash("A descrição de uma sala pode ter até 150 caracteres.")  
         return render_template('cadastrar-sala.html', tipo=tipo, capacidade=capacidade, descricao=descricao)
 
-    add_sala({descricao, tipo , capacidade})
+    nova_sala = {
+        "tipo": tipo,
+        "capacidade": capacidade,
+        "descricao": descricao
+    }
+
+    add_sala(nova_sala)
 
     return redirect("/listar-salas")
 
@@ -297,60 +290,35 @@ def reservas():
 
 @app.route("/editar-sala/<int:id>", methods=["GET", "POST"])
 def editar_sala(id):
-    salas = listar_salas()
-    sala = next((s for s in salas if int(s['id']) == id), None)
+    con = conexao_abrir(*con_params)
+    sala = obterSalaPorId(con, id)
 
     if request.method == "POST":
         tipo = request.form["tipo"]
         capacidade = request.form["capacidade"]
-        descricao = request.form["descricao"]
+        descricao = request.form["descricao"] or "-"
 
         if not tipo or not capacidade:
             flash("Preencha os campos de tipo e capacidade.")
-            return render_template("cadastrar-sala.html", sala={
-                "id": id,
-                "tipo": tipo,
-                "capacidade": capacidade,
-                "descricao": descricao,
-                "ativa": sala["ativa"]
-            })
+            return render_template("cadastrar-sala.html", sala=sala)
         
         capacidade = int(capacidade)
 
         if capacidade < 10 or capacidade > 150:
             flash("As salas de aula devem ter capacidade para comportar entre 10 e 150 alunos.")
-            return render_template("cadastrar-sala.html", sala={
-                "id": id,
-                "tipo": tipo,
-                "capacidade": capacidade,
-                "descricao": descricao,
-                "ativa": sala["ativa"]
-            })
+            return render_template("cadastrar-sala.html", sala=sala)
 
         if len(descricao) > 150:
             flash("A descrição de uma sala pode ter até 150 caracteres.")
-            return render_template("cadastrar-sala.html", sala={
-                "id": id,
-                "tipo": tipo,
-                "capacidade": capacidade,
-                "descricao": descricao,
-                "ativa": sala["ativa"]
-            })
+            return render_template("cadastrar-sala.html", sala=sala)
 
         sala_atualizada = {
-            "id": id,
             "tipo": tipo,
             "capacidade": capacidade,
             "descricao": descricao,
-            "ativa": sala["ativa"]
         }
 
-        salas = [sala_atualizada if int(s['id']) == id else s for s in salas]
-
-        with open(salas_csv, "w", newline='', encoding='utf-8') as file:
-            writer = csv.DictWriter(file, fieldnames=["id", "tipo", "descricao", "capacidade", "ativa"])
-            writer.writeheader()
-            writer.writerows(salas)
+        editarSala(con, id, *sala_atualizada.values())
 
         return redirect("/listar-salas")
 
@@ -358,50 +326,25 @@ def editar_sala(id):
 
 @app.route("/alterar-status-sala/<int:id>", methods=["POST"])
 def alterar_status_sala(id):
-    salas = listar_salas()
+    con = conexao_abrir(*con_params)
+    alterarAtivaSala(con, id)
+    conexao_fechar(con)
 
-    for s in salas:
-        if int(s['id']) == id:
-            sala = s
-    
-    if sala['ativa'] == "Ativa":
-        sala['ativa'] = "Inativa"
-    else:
-        sala['ativa'] = "Ativa"
-
-    with open(salas_csv, "w", newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames=["id", "tipo", "descricao", "capacidade", "ativa"])
-        writer.writeheader()
-        for s in salas:
-            writer.writerow(s)
-    
     return redirect("/listar-salas")
 
 @app.route("/excluir-sala/<int:id>", methods=["POST"])
 def excluir_sala(id):
-    salas = listar_salas()
+    con = conexao_abrir(*con_params)
+    deletarSala(con, id)
+    conexao_fechar(con)
 
-    salas = [sala for sala in salas if int(sala['id']) != id]
-
-    with open(salas_csv, "w", newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames=["id", "tipo", "descricao", "capacidade", "ativa"])
-        writer.writeheader()
-        for sala in salas:
-            writer.writerow(sala)
-    
     return redirect("/listar-salas")
 
 @app.route("/excluir-reserva/<int:id>", methods=["POST"])
 def excluir_reserva(id):
-    reservas = listar_reservas()
-
-    reservas = [reserva for reserva in reservas if int(reserva['id']) != id]
-
-    with open(reservas_csv, "w", newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames=["id", "sala", "inicio", "fim"])
-        writer.writeheader()
-        for reserva in reservas:
-            writer.writerow(reserva)
+    con = conexao_abrir(*con_params)
+    deletarReserva(con, id)
+    conexao_fechar(con)
     
     return redirect("/reservas")
 
@@ -409,17 +352,25 @@ def excluir_reserva(id):
 def filtrar_reservas():
     sala = request.form.get('sala')
     data = request.form.get('data')
-    
-    reservas = listar_reservas()
-    
-    if sala:
-        reservas = [reserva for reserva in reservas if sala == reserva['sala']]
-    if data:
-        reservas = [reserva for reserva in reservas if data in reserva['inicio'] or data in reserva['fim']]
 
+    con = conexao_abrir(*con_params)
+
+    if not (sala or data):
+        flash("Nenhum filtro aplicado.")
+        conexao_fechar(con)
+        return render_template("reservas.html", reservas=listar_reservas())
+        
+    if sala and data:
+        reservas = filtrarReservasPorDataESala(con, data, sala)
+    elif sala:
+        reservas = filtrarReservasPorSala(con, sala)
+    elif data:
+        reservas = filtrarReservasPorData(con, data)
+
+    conexao_fechar(con)
+    
     if len(reservas) == 0:
         flash("Nenhuma reserva encontrada.")
-        return render_template("reservas.html", reservas=reservas, sala=sala, data=data)
     
     return render_template("reservas.html", reservas=reservas, sala=sala, data=data)
 

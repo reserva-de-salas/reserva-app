@@ -61,7 +61,7 @@
   <script>
     function confirmarExclusao(event, formId) {
       event.preventDefault();
-      var confirma = confirm("Tem certeza de que deseja excluir esta sala?");
+      var confirma = confirm("Tem certeza de que deseja excluir esta sala? Todas as reservas para esta sala serão canceladas e excluidas automaticamente.");
       if (confirma) {
         document.getElementById(formId).submit();
       }
