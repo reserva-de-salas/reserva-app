@@ -80,7 +80,7 @@ def filtrarReservasPorData(con, data):
 
      data_type_datetime = datetime.strptime(data, "%Y-%m-%d")
 
-     data_inicio = data_type_datetime.strftime("%Y-%m-%d 00:00:00")  # Início do dia
+     data_inicio = data_type_datetime.strftime("%Y-%m-%d 00:00:00") 
      data_fim = data_type_datetime.strftime("%Y-%m-%d 23:59:59")
 
      sql = "SELECT * FROM reservas WHERE (inicio BETWEEN %s AND %s) OR (fim BETWEEN %s AND %s) OR (inicio < %s AND fim > %s)"
@@ -94,7 +94,7 @@ def filtrarReservasPorDataESala(con, data, sala_id):
 
      data_type_datetime = datetime.strptime(data, "%Y-%m-%d")
 
-     data_inicio = data_type_datetime.strftime("%Y-%m-%d 00:00:00")  # Início do dia
+     data_inicio = data_type_datetime.strftime("%Y-%m-%d 00:00:00")
      data_fim = data_type_datetime.strftime("%Y-%m-%d 23:59:59")
 
      sql = "SELECT * FROM reservas WHERE ((inicio BETWEEN %s AND %s) OR (fim BETWEEN %s AND %s) OR (inicio < %s AND fim > %s)) AND id_sala = %s"
@@ -139,8 +139,3 @@ def editarSala(con, id, tipo, capacidade, descricao):
      cursor.execute(sql, (tipo, capacidade, descricao, id))
      con.commit() 
      cursor.close()
-
-# Fazer consulta com filtro pra reserva e UPDATE em salas
-
-# Conexão 
-# con = conexao_abrir("localhost", "estudante1", "estudante1", "teste_python")    

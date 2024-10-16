@@ -107,7 +107,7 @@ def verificar_existencia_de_usuario(email):
 
 def add_reserva(reserva):
     con = conexao_abrir(*con_params)
-    inserirReserva(con, *reserva.values()) # argumento sala se chama id_sala dentro do banco
+    inserirReserva(con, *reserva.values())
     conexao_fechar(con)
 
 
@@ -144,8 +144,6 @@ def reservas_conflitam(nova_reserva, reservas_existentes):
     sala_nova = int(nova_reserva['sala'])
     
     for reserva in reservas_existentes:
-        # inicio_existente = datetime.fromisoformat(reserva['inicio'])
-        # fim_existente = datetime.fromisoformat(reserva['fim'])
         sala_existente = reserva['id_sala']
         print(sala_nova, sala_existente, sala_nova == sala_existente)
         
