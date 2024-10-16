@@ -20,27 +20,29 @@ criarBanco(con)
 conexao_fechar(con)
 
 def listar_salas():
-    salas = []
-    with open(salas_csv, "r", encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for linha in reader:
-            salas.append(linha)
+    con = conexao_abrir(*con_params)
+    salas = listarSalas(con)
+    conexao_fechar(con)
+
     return salas
 
-def procurar_proximo_id(arquivo_csv):
-    ids = []
-    with open(arquivo_csv, 'r', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for linha in reader:
-            if linha['id'].isdigit():
-                ids.append(int(linha['id']))
-    return max(ids) + 1 if ids else 1
+# def procurar_proximo_id(arquivo_csv):
+#     ids = []
+#     with open(arquivo_csv, 'r', encoding='utf-8') as file:
+#         reader = csv.DictReader(file)
+#         for linha in reader:
+#             if linha['id'].isdigit():
+#                 ids.append(int(linha['id']))
+#     return max(ids) + 1 if ids else 1
 
 def add_sala(sala):
-    sala['id'] = procurar_proximo_id(salas_csv)
-    with open(salas_csv, "a", encoding='utf-8', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=["id", "tipo", "descricao", "capacidade", "ativa"])
-        writer.writerow(sala)
+    # sala['id'] = procurar_proximo_id(salas_csv)
+    # with open(salas_csv, "a", encoding='utf-8', newline='') as file:
+    #     writer = csv.DictWriter(file, fieldnames=["id", "tipo", "descricao", "capacidade", "ativa"])
+    #     writer.writerow(sala)
+    con = conexao_abrir(*con_params)
+    inserirSala(con, *sala, 1)
+    conexao_fechar(con)
 
 def validar_email(email, c):
     padrao = r'^[\w\.-]+@[\w\.-]+\.\w+$'
@@ -73,9 +75,7 @@ def add_usuario(usuario):
         salt, hash_senha = hash_senha_com_salt(usuario['senha'])
 
         con = conexao_abrir(*con_params)
-
         inserirUsuario(con, usuario['nome'], usuario['email'], salt, hash_senha)
-
         conexao_fechar(con)
 
         return True
@@ -91,9 +91,9 @@ def verificar_login(email, senha):
     conexao_fechar(con)
     
     for usuario in usuarios:
-        if len(usuario) == 4 and usuario[1] == email:
-            salt_armazenado = usuario[2]
-            hashed_senha_armazenada = usuario[3]
+        if len(usuario) == 5 and usuario["email"] == email:
+            salt_armazenado = usuario["salt"]
+            hashed_senha_armazenada = usuario["hash_senha"]
 
             hashed_senha = hash_senha(senha, salt_armazenado)
 
@@ -106,7 +106,7 @@ def verificar_existencia_de_usuario(email):
     usuarios = listarUsuarios(con)
     conexao_fechar(con)
 
-    emails = [linha[1] for linha in usuarios if len(linha) == 4]
+    emails = [usuario["email"] for usuario in usuarios if len(usuario) == 5]
 
     emails.sort()
 
@@ -125,19 +125,21 @@ def add_reserva(reserva):
 
 
 def listar_reservas():
-    reservas = []
+    reservas_exibidas = []
+
+    con = conexao_abrir(*con_params)
+    todas_as_reservas = listarReservas(con)
+    conexao_fechar(con)
+
     agora = datetime.now()
 
-    with open(reservas_csv, "r", encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        for linha in reader:
-            fim_str = linha.get("fim")
-            fim = datetime.fromisoformat(fim_str)
+    for reserva in todas_as_reservas:
+        fim_str = reserva["fim"]
+                
+        if fim_str > agora:
+            reservas_exibidas.append(reserva)
             
-            if fim > agora:
-                reservas.append(linha)
-            
-    return reservas
+    return reservas_exibidas
 
 def validar_duracao_reserva(inicio_str, fim_str):
         inicio = datetime.fromisoformat(inicio_str)
@@ -152,14 +154,15 @@ def validar_duracao_reserva(inicio_str, fim_str):
 def reservas_conflitam(nova_reserva, reservas_existentes):
     inicio_nova = datetime.fromisoformat(nova_reserva['inicio'])
     fim_nova = datetime.fromisoformat(nova_reserva['fim'])
-    sala_nova = nova_reserva['sala']
+    sala_nova = int(nova_reserva['sala'])
     
     for reserva in reservas_existentes:
-        inicio_existente = datetime.fromisoformat(reserva['inicio'])
-        fim_existente = datetime.fromisoformat(reserva['fim'])
-        sala_existente = reserva['sala']
+        # inicio_existente = datetime.fromisoformat(reserva['inicio'])
+        # fim_existente = datetime.fromisoformat(reserva['fim'])
+        sala_existente = reserva['id_sala']
+        print(sala_nova, sala_existente, sala_nova == sala_existente)
         
-        if sala_nova == sala_existente and (inicio_nova < fim_existente) and (fim_nova > inicio_existente):
+        if sala_nova == sala_existente and (inicio_nova < reserva['fim']) and (fim_nova > reserva['inicio']):
             return reserva
         
     return None
@@ -202,12 +205,8 @@ def cadastrar_sala():
         flash("A descrição de uma sala pode ter até 150 caracteres.")  
         return render_template('cadastrar-sala.html', tipo=tipo, capacidade=capacidade, descricao=descricao)
 
-    con = conexao_abrir(*con_params)
+    add_sala({descricao, tipo , capacidade})
 
-    inserirSala(con, tipo, descricao, capacidade, 1)
-
-    conexao_fechar(con)
-    
     return redirect("/listar-salas")
 
 @app.route("/listar-salas")
@@ -241,7 +240,7 @@ def login():
         email = request.form["email"]
         senha = request.form["senha"]
 
-        if  not email or not senha:
+        if not email or not senha:
             flash("Preencha todos os campos.")
             return render_template('login.html', email=email, senha=senha)
         
@@ -275,9 +274,13 @@ def reservar_sala():
         
         reserva = {"sala": sala, "inicio": inicio, "fim": fim}
         reserva_conflitante = reservas_conflitam(reserva, listar_reservas())
+        print(reserva_conflitante)  
     
         if reserva_conflitante:
-            flash(f"Já há uma reserva para esta sala em {datetime.fromisoformat(reserva_conflitante['inicio']).strftime('%d/%m/%Y %H:%M')} até {datetime.fromisoformat(reserva_conflitante['fim']).strftime('%d/%m/%Y %H:%M')}.")
+            inicio_reserva_conflitante = reserva_conflitante['inicio'].strftime('%d/%m/%Y %H:%M')
+            fim_reserva_conflitante = reserva_conflitante['fim'].strftime('%d/%m/%Y %H:%M')
+
+            flash(f"Já há uma reserva para esta sala em {inicio_reserva_conflitante} até {fim_reserva_conflitante}.")
             return render_template('reservar-sala.html', sala=sala, inicio=inicio, fim=fim, salas=listar_salas())
         
         add_reserva(reserva) 

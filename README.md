@@ -17,6 +17,7 @@ Aplicação de exemplo para aulas sobre desenvolvimento web backend e criação 
   - Ver Reservas
   - Cancelar Reserva
   - Logout
+  Paulo12345+
 
 ## Models
 - Usuário

@@ -17,7 +17,7 @@
             <select class="form-select" id="sala" name="sala">
               <option value="" {% if not sala %}selected{% endif %}></option>
               {% for s in salas %}
-                {% if s.ativa == 'Ativa' %}
+                {% if s.ativa == 1 %}
                   <option value="{{ s.id }}" {% if s.id == sala %}selected{% endif %}>
                     {{ s.id }} - {{ s.tipo }}
                   </option>
