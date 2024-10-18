@@ -1,5 +1,5 @@
 -- create database if not exists reservasalas;
--- use reservaSalas;
+-- use reservasalas;
 
 create table if not exists usuario (
 	id int primary key auto_increment,

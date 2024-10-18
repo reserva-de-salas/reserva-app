@@ -1,6 +1,7 @@
 # Import da conexão
 from datetime import datetime
 from conexao_bd import conexao_fechar, conexao_abrir
+import mariadb
 
 # Todas as funções do banco precisam receber a conexão como parâmetro
 
@@ -117,6 +118,28 @@ def criarBanco(con):
      cursor = con.cursor()
      cursor.execute(sql)
      cursor.close()
+
+# def criarBanco(con):
+#     cursor = con.cursor()
+
+#     # Corrigir a sintaxe SQL aqui
+#     sql = """
+#     CREATE TABLE IF NOT EXISTS salas (
+#         id INT PRIMARY KEY AUTO_INCREMENT,
+#         tipo VARCHAR(100),
+#         capacidade INT,
+#         descricao VARCHAR(150)
+#     );
+#     """
+    
+#     try:
+#         cursor.execute(sql)
+#         con.commit()
+#         print("Tabela 'salas' criada com sucesso!")
+#     except mariadb.Error as e:
+#         print(f"Erro ao criar tabela: {e}")
+#     finally:
+#         cursor.close()
 
 def alterarAtivaSala(con, id):
      cursor = con.cursor()

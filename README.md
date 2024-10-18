@@ -82,8 +82,9 @@ Python: Select Interpreter
 - Nos laboratórios do IFSP
 `source venv/bin/activate`
 
-4. Instalar o pacote do mysql-connector-python
+4. Instalar o pacote do mysql-connector-python ou mariadb
 `pip install mysql-connector-python`
+`pip install mariadb`
 
 5. Abrir o VSCode e ir até o diretório do projeto
 
