@@ -1,92 +1,136 @@
-# Reserva App
+# Reserva App Documentation
 
-Aplicação de exemplo para aulas sobre desenvolvimento web backend e criação de multipage applications utilizand Python e Flask.
+## Project Overview
 
-## Usuários vs. Funcionalidades
-- Administrador
-  - Login
-  - Reservar Sala
-  - Ver Reservas
-  - Cancelar Reserva
-  - Gerenciar Salas
-  - Logout
-- Professor
-  - Cadastrar
-  - Login
-  - Reservar Sala
-  - Ver Reservas
-  - Cancelar Reserva
-  - Logout
-  Paulo12345+
+The **Reserva App** is a web-based application designed to streamline the process of reserving rooms for various purposes, such as meetings, classes, or events. Developed using Python and the Flask framework, this project serves as a practical example of backend web development and multi-page application design.
 
-## Models
-- Usuário
-  - codigo
-  - nome
-  - email
-  - senha
-  - ativo
-  - admin
-- Sala
-  - codigo
-  - capacidade
-  - ativa
-  - tipo
-  - descricao
-- Reserva
-  - codigo
-  - usuario
-  - sala
-  - data e hora início
-  - data e hora fim
-  - ativa
-  
-## Instalação e execução
+---
 
-1. Baixar e instalar o poetry
-`curl -sSL https://install.python-poetry.org | python3 -`
-`export PATH="$HOME/.local/bin:$PATH"`
+## Key Features
 
-- Nos laboratórios do IFSP
-`export PATH="/home/estudante1/.local/bin:$PATH"`
+### User Roles
 
-2. Fazer o clone do repositório e abrir o projeto no VSCode
-`git clone https://github.com/reserva-de-salas/reserva-app.git`
+1. **Administrator**:
+   - Login.
+   - Reserve rooms.
+   - View all reservations.
+   - Cancel reservations.
+   - Manage room details.
+   - Logout.
 
-3. Ativar e instalar as dependências do ambiente virtual controlado pelo poetry no VSCode
-`poetry shell`
-`poetry install`
+2. **Professor**:
+   - Register an account.
+   - Login.
+   - Reserve rooms.
+   - View personal reservations.
+   - Cancel own reservations.
+   - Logout.
 
-4. Instalar a extensão do python
+### Data Models
 
-5. Selecionar o interpretador python correto
-`Ctrl + Shift + P`
-Python: Select Interpreter
+- **User**:
+  - ID
+  - Name
+  - Email
+  - Password (hashed for security)
+  - Active status
+  - Admin status
 
-6. Executar o projeto
-`poetry run flask --app diretorio_do_projeto/app.py run`
+- **Room**:
+  - ID
+  - Capacity
+  - Active status
+  - Type (e.g., conference, lecture)
+  - Description
 
-## Conexão com banco MySQL
+- **Reservation**:
+  - ID
+  - User ID
+  - Room ID
+  - Start datetime
+  - End datetime
+  - Active status
 
-1. Abrir o prompt de comando e ir até a pasta do projeto
+---
 
-2. Criação do ambiente virtual venv
-`python -m venv venv`
+## Technical Implementation
 
-- Nos laboratórios do IFSP
-`python3 -m venv venv`
+### Backend
+- Built using Python with the Flask framework.
+- Database managed with SQLite.
+- Implements the Model-View-Controller (MVC) architectural pattern.
 
-3. Ativar o ambiente virtual
-`venv\Scripts\activate`
+### Frontend
+- Jinja2 templating engine for rendering dynamic HTML templates.
+- Responsive user interface designed with HTML5 and CSS3.
 
-- Nos laboratórios do IFSP
-`source venv/bin/activate`
+### Authentication & Authorization
+- Secure user registration and login functionalities.
+- Password hashing for secure storage.
+- Role-based access control (RBAC) to differentiate functionalities between administrators and professors.
 
-4. Instalar o pacote do mysql-connector-python ou mariadb
-`pip install mysql-connector-python`
-`pip install mariadb`
+---
 
-5. Abrir o VSCode e ir até o diretório do projeto
+## Installation and Setup
 
-6. Ativar o serviço do MySQL e criar uma banco de dados no MySQL Workbench
+### Prerequisites
+- Python 3.8+
+- [Poetry](https://python-poetry.org/)
+- SQLite
 
+### Steps
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/reserva-de-salas/reserva-app.git
+   cd reserva-app
+   ```
+
+2. **Install Dependencies:**
+   ```bash
+   poetry install
+   ```
+
+3. **Set Up the Database:**
+   - Use the provided SQL script to initialize the database:
+     ```bash
+     sqlite3 database.db < banco.sql
+     ```
+
+4. **Run the Application:**
+   - Start the Flask application using Poetry:
+     ```bash
+     poetry run flask run
+     ```
+
+---
+
+## CSV Files
+
+The project includes some CSV files that were previously used before the database implementation. These files have been retained for testing purposes but do not play an active role in the current functionality of the application.
+
+---
+
+## Educational Value
+
+This project provides hands-on experience with:
+
+- **Flask Application Development**:
+  - Organizing routes, templates, and static files.
+
+- **Database Management**:
+  - Implementing CRUD operations with SQLite.
+
+- **Authentication**:
+  - Managing user sessions and securing endpoints.
+
+- **Role-Based Access Control**:
+  - Differentiating functionalities based on user roles.
+
+---
+
+## Conclusion
+
+The **Reserva App** is a fully functional room reservation system and a practical example of web application design and development using Python and Flask. It offers valuable insights into backend development, user management, and role-based access control.
+
+For more information, access the [GitHub repository](https://github.com/reserva-de-salas/reserva-app).
